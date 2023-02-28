@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vectorcalc"
+version = "0.0.1"
+authors = [
+  { name="Kenny", email="kenny@kennymoc.xyz" },
+]
+description = "A small package to do vector calculus."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/xan3c/vectorcalc"
+"Bug Tracker" = "https://github.com/xan3c/vectorcalc/issues"
