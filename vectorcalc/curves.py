@@ -1,6 +1,11 @@
 class Curve():
     """
     Defines a curve that goes from R to R^M 
+
+    -----Attributes-----
+    begin_point : 
+    end_point : 
+    curve_dim : 
     """
     def __init__(self, domain_interval:list, curve_func:list) -> None:
         """Inits Curve with a domain interval and a parametrization of the curve"""
@@ -15,13 +20,16 @@ class Curve():
         #Defining variables in class-scope
         self.begin_point = domain_interval[0]
         self.end_point = domain_interval[1]
-        self.curve_dimensions = len(curve_func)     #The dimension of the vector space of the line
+        self.curve_dim = len(curve_func)     #The dimension of the vector space of the curve
 
         return None
     
     def __add__(self, second_curve: Curve):
         """Overloads the addition operator to add curves together"""
         pass
+
+def scalar_integrate(curve : Curve, func, num : int) -> int:
+    pass
 
 
 
