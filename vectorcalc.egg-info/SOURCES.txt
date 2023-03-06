@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+tests/test_curve.py
+vectorcalc/__init__.py
+vectorcalc/curves.py
+vectorcalc.egg-info/PKG-INFO
+vectorcalc.egg-info/SOURCES.txt
+vectorcalc.egg-info/dependency_links.txt
+vectorcalc.egg-info/top_level.txt
