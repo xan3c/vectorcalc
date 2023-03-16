@@ -21,5 +21,9 @@ class TestCurveValues(unittest.TestCase):
       self.assertEqual(curve.value(1), [1, 1], 'incorrect boundary point')
       self.assertEqual(curve.value(3), [1, 5], 'incorrect curve extension')
 
+      curve = vc.Curve([0, 1], [lambda x: 3*x -2, lambda x: 3*x-1 ])
+      self.assertEqual(round(vc.scalar_integrate(curve, lambda x, y: 4*x**3, neval = 10000), 2), -21.21, 'incorrect scalar integral')
 
-unittest.main()
+
+if __name__ == "__main__":
+    unittest.main()
