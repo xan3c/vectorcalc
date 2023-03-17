@@ -1,4 +1,5 @@
 import math
+import warnings
 
 class Curve():
     """
@@ -77,47 +78,115 @@ class Curve():
     def __add__(self, second_curve):
         """Overloads the addition operator to add curves together"""
         
-        #Some error handling
+        # Some error handling
         if not second_curve.begin_point == self.end_point:
             raise Exception('Domain of second curve does not begin at the end of the first curve.')
         if not second_curve.value(second_curve.begin_point) == self.value(self.end_point):
             raise Exception('Curves must join at endpoints')
 
-        #updates the curve with its new properties
+        # Updates the curve with its new properties
         self.breaks.update(second_curve.breaks)
         self.end_point = second_curve.end_point
 
         return self      
 
 def truncate(f, n):
+    """Utility function to truncate float (f) to n digits"""
     return math.floor(f * 10 ** n) / 10 ** n
 
+def domain_truncate(point_one: float, point_two: float, trunc: int) -> "two floats":
+    """"
+    Utility function to truncate two points.
+    Used for integration and length calculations to handle irrational curve boundaries
+
+    -----Parameters-----
+    point_one : float
+    point_two : float
+    trunc : int
+        The number of digits to truncate each point
+
+    -----Returns-----
+    a, b : float, float
+        Returns the two truncated points
+    """
+    a, b = truncate(point_one, trunc), truncate(point_two, trunc)
+    truncation_error = [math.abs(a - point_one) / a,  math.abs(b - point_two) / b]
+    if truncation_error[0] > 0.01 or truncation_error[1] > 0.01:
+        warnings.warn("The relative error of truncating the curve bounds is more than 1%. Consider increasing truncation")
+
+    return a, b
+
 def scalar_integrate(curve : Curve, func, neval=100, trunc=10) -> float:
-    """Finds a numerical integral of a scalar function over a curve via midpoint method"""
-    a, b = truncate(curve.begin_point, trunc), truncate(curve.end_point, trunc)
+    """
+    Finds a numerical integral of a scalar function over a curve via. midpoint method
+
+    -----Parameters-----
+    curve : vectorcalc.Curve
+        The curve used in the curve integral
+
+    func : callable
+        The scalar function integrated over this curve. func must have as many parameters as the dimension of the curve
+        e.g. if the curve lies in R^3, then func must take 3 arguments
+
+    neval : int
+        The number of evaluations done. i.e. the size of the partition of the curve.
+
+    trunc : int
+        The number of digits to truncate the curve's bounds. This is needed to handle irrational numbers.
+
+    -----Returns-----
+    result : float
+        The value of the integral
+
+    -----TODO-----
+        Implement and return error estimation 
+    """
+
+    # Truncates curve boundaries to handle irrational boundaries
+    a, b = domain_truncate(curve.begin_point, curve.end_point)
+    
+    # Calculates the step_size
+    domain_range = b - a
+    step_size = domain_range/neval
+
+    # Begins calculation of the integral
+    result = 0
+    for i in range(neval):
+        # Finds length between the two curve points
+        distance = math.dist(curve.value(a + (i+1)*step_size), curve.value(a + i*step_size))    
+        # Finds the evaluation point: the point that lies in the middle of the two curve points
+        eval_point = curve.value(a + step_size/2 + i * step_size)
+        # Multiplies the length of the curve with the function evaluated at the evaluation point and adds it to the result
+        result += func(*eval_point) * distance 
+    return result
+
+def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
+    """integrates vector functions over a curve"""
+
+    # Tests that the vector function is in the same space as the curve, so that the dot product is well-defined
+    if not curve.dim == len(func):
+        raise Exception('Vector function must be in the same space as the curve.')
+
+    a, b = domain_truncate(curve.begin_point, curve.end_point)
     domain_range = b - a
     step_size = domain_range/neval
 
     result = 0
     for i in range(neval):
-        distance = math.dist(curve.value(a + (i+1)*step_size), curve.value(a + i*step_size))
-        eval_point = curve.value(a + step_size/2 + i * step_size)
-        result += func(*eval_point) * distance
+        eval_point = curve.value(a + step_size / 2 + i * step_size)
+        func_eval = [i(*eval_point) for i in func]
+        begin_bound = curve.value(a + i*step_size)
+        end_bound = curve.value(a + (i+1)*step_size)
+
+        for j, k, l in zip(func_eval, begin_bound, end_bound):
+            result += j * math.sqrt((l-k)**2)
+
     return result
-
-def integrate(curve: Curve, func, neval=100, trunc=10) -> float:
-    """integrates vector and scalar functions over a curve"""
-    a, b = truncate(curve.begin_point, trunc), truncate(curve.end_point, trunc)
-    domain_range = b - a
-    step_size = domain_range/neval
-
-    result = 0
-    pass
-
 
 def curve_length(curve: Curve, neval=100, trunc=10) -> float:
     """returns a numerical estimate of the curve length"""
-    a, b = truncate(curve.begin_point, trunc), truncate(curve.end_point, trunc)
+    a, b = domain_truncate(curve.begin_point, curve.end_point)
+
     domain_range = b - a
     step_size = domain_range/neval
     length = 0
