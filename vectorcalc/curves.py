@@ -110,9 +110,14 @@ def domain_truncate(point_one: float, point_two: float, trunc: int) -> "two floa
         Returns the two truncated points
     """
     a, b = truncate(point_one, trunc), truncate(point_two, trunc)
-    truncation_error = [math.abs(a - point_one) / a,  math.abs(b - point_two) / b]
-    if truncation_error[0] > 0.01 or truncation_error[1] > 0.01:
-        warnings.warn("The relative error of truncating the curve bounds is more than 1%. Consider increasing truncation")
+    truncation_error = []
+    if a != 0:
+        truncation_error.append(abs(a - point_one) / a)
+    if b!= 0:
+        truncation_error.append(abs(b - point_two) / b)
+    for i in truncation_error:
+        if i > 0.01:
+            warnings.warn("The relative error of truncating the curve bounds is more than 1%. Consider increasing truncation")
 
     return a, b
 
@@ -143,7 +148,7 @@ def scalar_integrate(curve : Curve, func, neval=100, trunc=10) -> float:
     """
 
     # Truncates curve boundaries to handle irrational boundaries
-    a, b = domain_truncate(curve.begin_point, curve.end_point)
+    a, b = domain_truncate(curve.begin_point, curve.end_point, 10)
     
     # Calculates the step_size
     domain_range = b - a
@@ -167,7 +172,7 @@ def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
     if not curve.dim == len(func):
         raise Exception('Vector function must be in the same space as the curve.')
 
-    a, b = domain_truncate(curve.begin_point, curve.end_point)
+    a, b = domain_truncate(curve.begin_point, curve.end_point, 10)
     domain_range = b - a
     step_size = domain_range/neval
 
@@ -185,7 +190,7 @@ def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
 
 def curve_length(curve: Curve, neval=100, trunc=10) -> float:
     """returns a numerical estimate of the curve length"""
-    a, b = domain_truncate(curve.begin_point, curve.end_point)
+    a, b = domain_truncate(curve.begin_point, curve.end_point, 10)
 
     domain_range = b - a
     step_size = domain_range/neval
