@@ -148,7 +148,7 @@ def scalar_integrate(curve : Curve, func, neval=100, trunc=10) -> float:
     """
 
     # Truncates curve boundaries to handle irrational boundaries
-    a, b = domain_truncate(curve.begin_point, curve.end_point, 10)
+    a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
     
     # Calculates the step_size
     domain_range = b - a
@@ -172,7 +172,7 @@ def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
     if not curve.dim == len(func):
         raise Exception('Vector function must be in the same space as the curve.')
 
-    a, b = domain_truncate(curve.begin_point, curve.end_point, 10)
+    a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
     domain_range = b - a
     step_size = domain_range/neval
 
@@ -190,7 +190,7 @@ def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
 
 def curve_length(curve: Curve, neval=100, trunc=10) -> float:
     """returns a numerical estimate of the curve length"""
-    a, b = domain_truncate(curve.begin_point, curve.end_point, 10)
+    a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
 
     domain_range = b - a
     step_size = domain_range/neval
