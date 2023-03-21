@@ -37,6 +37,8 @@ class TestCurveFuncs(unittest.TestCase):
         curve = vc.Curve([0, 1], [lambda x: x, lambda x: x**2, lambda x: x**3])
         self.assertEqual(round(vc.vector_integrate(curve, [lambda x, y, z : 8*x**2*y*z, lambda x, y, z : 5*z, lambda x, y, z : -4*x*y]), 3), 1.000, 'incorrect vector integral')
 
+        # Tests curve_length() of a curve with known length to 3 decimal places
+        curve = vc.Curve([])
 
 if __name__ == "__main__":
     unittest.main()

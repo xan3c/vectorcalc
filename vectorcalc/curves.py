@@ -166,36 +166,86 @@ def scalar_integrate(curve : Curve, func, neval=100, trunc=10) -> float:
     return result
 
 def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
-    """integrates vector functions over a curve"""
+    """
+    Finds a numerical integral of a vector-valued function over a curve via. midpoint method
+
+    -----Parameters-----
+    curve : vectorcalc.Curve
+        The curve used in the curve integral
+
+    func : list
+        The vector-valued function integrated over this curve. There must be as many elements in the list 
+        as there are dimensions of the curve. Each element in the list represents a callable function,
+        with each function also having as many parameters as the dimension of the curve. 
+        e.g. if the curve lies in R^3, then a valid argument is [f, g, h] where each of f, g, and h
+        are callable and take three arguments.
+
+    neval : int
+        The number of evaluations done. i.e. the size of the partition of the curve.
+
+    trunc : int
+        The number of digits to truncate the curve's bounds. This is needed to handle irrational numbers.
+
+    -----Returns-----
+    result : float
+        The value of the integral
+
+    -----TODO-----
+        Implement and return error estimation 
+    """
 
     # Tests that the vector function is in the same space as the curve, so that the dot product is well-defined
     if not curve.dim == len(func):
-        raise Exception('Vector function must be in the same space as the curve.')
+        raise Exception('Vector-valued function must be in the same space as the curve.')
 
+    # Truncates the boundary points to deal with irrational numbers. 
     a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
+
+    # Sets up domain of integral and the step size
     domain_range = b - a
     step_size = domain_range/neval
 
+    # Performing the integral
     result = 0
     for i in range(neval):
+        # Finds the evaluation point: the point that lies in the middle of two curve points
         eval_point = curve.value(a + step_size / 2 + i * step_size)
+        # Evaluates the function at this evaluation point
         func_eval = [i(*eval_point) for i in func]
+        # Finds the two curve points (i.e. the bounds where the evaluation point lies in the middle)
         begin_bound = curve.value(a + i*step_size)
         end_bound = curve.value(a + (i+1)*step_size)
 
+        # In each component multiplies the distance between the bound points and the evaluated point
         for j, k, l in zip(func_eval, begin_bound, end_bound):
             result += j * math.sqrt((l-k)**2)
 
     return result
 
 def curve_length(curve: Curve, neval=100, trunc=10) -> float:
-    """returns a numerical estimate of the curve length"""
+    """
+    Returns a numerical estimate of the curve length
+
+     -----Parameters-----
+    curve : vectorcalc.Curve
+        The curve to estimate the length of
+
+    neval : int
+        The number of evaluations done. i.e. the size of the partition of the curve.
+
+    trunc : int
+        The number of digits to truncate the curve's bounds. This is needed to handle irrational numbers.
+
+    -----Returns-----
+    
+    length : float
+        The numerically estimated length of the curve
+    """
+
+    # Truncates the boundaries to handle irrational numbers
     a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
 
-    domain_range = b - a
-    step_size = domain_range/neval
-    length = 0
-    for i in range(neval):
-        length += math.dist(curve.value(a + (i+1)*step_size), curve.value(a + i*step_size))
+    # Integrates the constant function "1" over the curve
+    length = scalar_integrate(curve, lambda x: 1, neval = neval, trunc = trunc)
 
     return length
