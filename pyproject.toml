@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "vectorcalc"
 version = "0.0.1"
 authors = [
-  { name="Kenny", email="kenny@kennymoc.xyz" },
+  { name="Kenny", email="admin@kennymoc.xyz" },
 ]
 description = "A small package to do vector calculus."
 readme = "README.md"
