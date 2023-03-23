@@ -246,6 +246,72 @@ def curve_length(curve: Curve, neval=100, trunc=10) -> float:
     a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
 
     # Integrates the constant function "1" over the curve
-    length = scalar_integrate(curve, lambda x: 1, neval = neval, trunc = trunc)
+    length = scalar_integrate(curve, lambda *args: 1, neval = neval, trunc = trunc)
 
     return length
+
+def vector_integrate_square(func : list, point_one : list, point_two: list, neval=100, trunc=10) -> float:
+    """
+    Finds a numerical integral of a vector-valued function over a square via. vector_integrate() (using midpoint method)
+    The square is defined by two points.
+
+    -----Parameters-----
+
+    func : list
+        The vector-valued function integrated over this curve. There must be as many elements in the list 
+        as there are dimensions of the curve. Each element in the list represents a callable function,
+        with each function also having as many parameters as the dimension of the curve. 
+        e.g. if the curve lies in R^3, then a valid argument is [f, g, h] where each of f, g, and h
+        are callable and take three arguments.
+
+    point_one : list
+        One of two points that defines the square.
+    
+    point_two : list
+        Second of the two points that define the square.
+
+    neval : int
+        The number of evaluations done. i.e. the size of the partition of the curve.
+
+    trunc : int
+        The number of digits to truncate the curve's bounds. This is needed to handle irrational numbers.
+
+    -----Returns-----
+    result : float
+        The value of the integral
+
+    -----TODO-----
+        Implement and return error estimation 
+    """
+    
+    # Catching some errors
+    if len(point_one) != 2 or len(point_two) != 2:
+        raise Exception('The points must both be in R^2')
+    if (point_two[0] - point_one[0]) != (point_two[1] - point_one[0]):
+        raise Exception('Points do not define a square')
+    if (point_one[0] - point_two[0]) == 0:
+        raise Exception('Points do not define a square')
+    
+    # Calculates side-length of the square
+    side_length = abs(point_two[0] - point_one[0])
+
+    # Finds the bottom left corner of square
+    x_begin = min(point_one[0], point_two[0])
+    y_begin = min(point_one[1], point_two[1])
+
+    # Creates lines connecting the four points of the square
+    x_curve_one = Curve([0, 1], [lambda t: side_length * t + x_begin, lambda t : y_begin])
+    x_curve_two = Curve([0, 1], [lambda t: (x_begin + side_length) - side_length * t, lambda t: y_begin + side_length])
+    y_curve_one = Curve([0, 1], [lambda t: x_begin + side_length, lambda t: side_length*t + y_begin])
+    y_curve_two = Curve([0, 1], [lambda t: x_begin, lambda t: (y_begin + side_length) - side_length * t])
+
+    # Integrates the function over each line and adds them up
+    result = (
+        vector_integrate(x_curve_one, func, neval=neval, trunc=trunc)
+        + vector_integrate(y_curve_one, func, neval=neval, trunc=trunc)
+        # The orientation of the curve is negative here, so we subtract instead of add these two lines
+        - vector_integrate(x_curve_two, func, neval=neval, trunc=trunc) 
+        - vector_integrate(y_curve_two, func, neval=neval, trunc=trunc)
+        )
+    
+    return result
