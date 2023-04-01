@@ -5,8 +5,6 @@ class Curve():
     """
     Defines a curve that goes from R to R^M 
 
-    ...
-
     -----Attributes-----
     begin_point : float
         the beginning point of the curve's domain (inclusive)
@@ -43,14 +41,15 @@ class Curve():
         #Defining instance variables
 
         # A dictionary to store where all the breaks in the domain are at.
-        # This will be useful when we add curves together, so we know when our curve_func parametrization changes
+        # This will be useful when we add curves together, so we know when our
+        # curve_func parametrization changes
         self.breaks = {}                 
         self.breaks[domain_interval[0]] = curve_func         #The start of the domain maps to curve_func
         self.breaks[domain_interval[1]] = curve_func     
 
         # The domain of the curve
         self.begin_point = list(self.breaks)[0]
-        self.end_point =  list(self.breaks)[-1]
+        self.end_point = list(self.breaks)[-1]
         self.dim = len(curve_func)     # The dimension of the vector space of the curve
 
         return None
@@ -113,7 +112,7 @@ def domain_truncate(point_one: float, point_two: float, trunc: int) -> "two floa
     truncation_error = []
     if a != 0:
         truncation_error.append(abs(a - point_one) / a)
-    if b!= 0:
+    if b != 0:
         truncation_error.append(abs(b - point_two) / b)
     for i in truncation_error:
         if i > 0.01:
@@ -121,7 +120,7 @@ def domain_truncate(point_one: float, point_two: float, trunc: int) -> "two floa
 
     return a, b
 
-def scalar_integrate(curve : Curve, func, neval=100, trunc=10) -> float:
+def scalar_integrate(curve: Curve, func, neval=100, trunc=10) -> float:
     """
     Finds a numerical integral of a scalar function over a curve via. midpoint method
 
@@ -152,20 +151,22 @@ def scalar_integrate(curve : Curve, func, neval=100, trunc=10) -> float:
     
     # Calculates the step_size
     domain_range = b - a
-    step_size = domain_range/neval
+    step_size = truncate(domain_range / neval, 14)
 
     # Begins calculation of the integral
     result = 0
     for i in range(neval):
         # Finds length between the two curve points
-        distance = math.dist(curve.value(a + (i+1)*step_size), curve.value(a + i*step_size))    
-        # Finds the evaluation point: the point that lies in the middle of the two curve points
-        eval_point = curve.value(a + step_size/2 + i * step_size)
-        # Multiplies the length of the curve with the function evaluated at the evaluation point and adds it to the result
+        distance = math.dist(curve.value(a + (i + 1) * step_size), curve.value(a + i * step_size))    
+        # Finds the evaluation point: the point that lies in the middle of the
+        # two curve points
+        eval_point = curve.value(a + step_size / 2 + i * step_size)
+        # Multiplies the length of the curve with the function evaluated at the
+        # evaluation point and adds it to the result
         result += func(*eval_point) * distance 
     return result
 
-def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
+def vector_integrate(curve: Curve, func: list, neval=100, trunc=10) -> float:
     """
     Finds a numerical integral of a vector-valued function over a curve via. midpoint method
 
@@ -194,31 +195,35 @@ def vector_integrate(curve: Curve, func : list, neval=100, trunc=10) -> float:
         Implement and return error estimation 
     """
 
-    # Tests that the vector function is in the same space as the curve, so that the dot product is well-defined
+    # Tests that the vector function is in the same space as the curve, so that
+    # the dot product is well-defined
     if not curve.dim == len(func):
         raise Exception('Vector-valued function must be in the same space as the curve.')
 
-    # Truncates the boundary points to deal with irrational numbers. 
+    # Truncates the boundary points to deal with irrational numbers.
     a, b = domain_truncate(curve.begin_point, curve.end_point, trunc)
 
     # Sets up domain of integral and the step size
     domain_range = b - a
-    step_size = domain_range/neval
+    step_size = truncate(domain_range / neval, 14)
 
     # Performing the integral
     result = 0
     for i in range(neval):
-        # Finds the evaluation point: the point that lies in the middle of two curve points
+        # Finds the evaluation point: the point that lies in the middle of two
+        # curve points
         eval_point = curve.value(a + step_size / 2 + i * step_size)
         # Evaluates the function at this evaluation point
         func_eval = [i(*eval_point) for i in func]
-        # Finds the two curve points (i.e. the bounds where the evaluation point lies in the middle)
-        begin_bound = curve.value(a + i*step_size)
-        end_bound = curve.value(a + (i+1)*step_size)
+        # Finds the two curve points (i.e.  the bounds where the evaluation
+        # point lies in the middle)
+        begin_bound = curve.value(a + i * step_size)
+        end_bound = curve.value(a + (i + 1) * step_size)
 
-        # In each component multiplies the distance between the bound points and the evaluated point
+        # In each component multiplies the distance between the bound points
+        # and the evaluated point
         for j, k, l in zip(func_eval, begin_bound, end_bound):
-            result += j * math.sqrt((l-k)**2)
+            result += j * math.sqrt((l - k) ** 2)
 
     return result
 
@@ -250,7 +255,7 @@ def curve_length(curve: Curve, neval=100, trunc=10) -> float:
 
     return length
 
-def vector_integrate_square(func : list, point_one : list, point_two: list, neval=100, trunc=10) -> float:
+def vector_integrate_square(func: list, point_one: list, point_two: list, neval=100, trunc=10) -> float:
     """
     Finds a numerical integral of a vector-valued function over a square via. vector_integrate() (using midpoint method)
     The square is defined by two points.
@@ -302,16 +307,13 @@ def vector_integrate_square(func : list, point_one : list, point_two: list, neva
     # Creates lines connecting the four points of the square
     x_curve_one = Curve([0, 1], [lambda t: side_length * t + x_begin, lambda t : y_begin])
     x_curve_two = Curve([0, 1], [lambda t: (x_begin + side_length) - side_length * t, lambda t: y_begin + side_length])
-    y_curve_one = Curve([0, 1], [lambda t: x_begin + side_length, lambda t: side_length*t + y_begin])
+    y_curve_one = Curve([0, 1], [lambda t: x_begin + side_length, lambda t: side_length * t + y_begin])
     y_curve_two = Curve([0, 1], [lambda t: x_begin, lambda t: (y_begin + side_length) - side_length * t])
 
     # Integrates the function over each line and adds them up
-    result = (
-        vector_integrate(x_curve_one, func, neval=neval, trunc=trunc)
-        + vector_integrate(y_curve_one, func, neval=neval, trunc=trunc)
-        # The orientation of the curve is negative here, so we subtract instead of add these two lines
-        - vector_integrate(x_curve_two, func, neval=neval, trunc=trunc) 
-        - vector_integrate(y_curve_two, func, neval=neval, trunc=trunc)
-        )
+    result = (vector_integrate(x_curve_one, func, neval=neval, trunc=trunc) + vector_integrate(y_curve_one, func, neval=neval, trunc=trunc)
+        # The orientation of the curve is negative here, so we subtract instead
+        # of add these two lines
+        - vector_integrate(x_curve_two, func, neval=neval, trunc=trunc) - vector_integrate(y_curve_two, func, neval=neval, trunc=trunc))
     
     return result
