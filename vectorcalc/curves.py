@@ -317,3 +317,4 @@ def vector_integrate_square(func: list, point_one: list, point_two: list, neval=
         - vector_integrate(x_curve_two, func, neval=neval, trunc=trunc) - vector_integrate(y_curve_two, func, neval=neval, trunc=trunc))
     
     return result
+
